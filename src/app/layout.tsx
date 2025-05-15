@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'My Movie Finder',
+  title: 'MovieFinder',
   description: 'Find IMDB and Rotten Tomatoes ratings for movies.',
 };
 
