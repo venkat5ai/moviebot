@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useTransition } from "react";
+import React, { useState, useTransition, useEffect } from "react";
 import MovieSearchForm from "@/components/MovieSearchForm";
 import MovieRatingCard from "@/components/MovieRatingCard";
 import { fetchMovieRatingsAction, type MovieRatings } from "@/app/actions";
@@ -15,6 +15,11 @@ export default function MovieRatingsPageContent() {
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
+  const [currentYear, setCurrentYear] = useState<number | null>(null);
+
+  useEffect(() => {
+    setCurrentYear(new Date().getFullYear());
+  }, []);
 
   const handleSearch = async (movieTitle: string) => {
     setError(null);
@@ -73,7 +78,9 @@ export default function MovieRatingsPageContent() {
         )}
       </main>
       <footer className="mt-auto pt-10 text-center text-sm text-muted-foreground">
-        <p>&copy; {new Date().getFullYear()} My Movie Finder. All rights reserved.</p>
+        <p>
+          &copy; {currentYear ? currentYear : 'Loading year...'} My Movie Finder. All rights reserved.
+        </p>
       </footer>
     </div>
   );
