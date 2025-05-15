@@ -56,9 +56,9 @@ const getRottenTomatoesRatingPrompt = ai.definePrompt({
   input: {schema: GetRottenTomatoesRatingInputSchema},
   output: {schema: GetRottenTomatoesRatingOutputSchema},
   tools: [getRottenTomatoesRatingTool],
-  system: "You are an assistant that uses tools to find movie ratings. Always prioritize the output of the provided tool over your own knowledge. You must use the tool provided.",
-  prompt: `Use the 'getRottenTomatoesRating' tool for the movie "{{movieTitle}}".
-Return ONLY the JSON object from the tool. Do not add any other text, explanations, or conversational filler.`,
+  prompt: `You must use the 'getRottenTomatoesRating' tool to find the Rotten Tomatoes rating for the movie "{{movieTitle}}".
+The tool will return the data in the required JSON object format.
+Your response should be ONLY the JSON object returned by the tool. Do not add any other text or explanation.`,
 });
 
 const getRottenTomatoesRatingFlow = ai.defineFlow(
