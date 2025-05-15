@@ -2,7 +2,6 @@
 "use client";
 
 import React, { useState, useTransition } from "react";
-import { Film } from "lucide-react";
 import MovieSearchForm from "@/components/MovieSearchForm";
 import MovieRatingCard from "@/components/MovieRatingCard";
 import { fetchMovieRatingsAction, type MovieRatings } from "@/app/actions";
@@ -40,8 +39,9 @@ export default function MovieRatingsPageContent() {
     <div className="flex flex-col items-center min-h-screen py-8 px-4 bg-background">
       <header className="mb-10 text-center">
         <div className="flex items-center justify-center mb-2">
-          <Film className="w-12 h-12 text-primary" />
-          <h1 className="text-5xl font-bold ml-3 text-primary">My Movie Finder</h1>
+          <span className="text-5xl" role="img" aria-label="Clapper board">🎬</span>
+          <h1 className="text-5xl font-bold mx-3 text-primary">My Movie Finder</h1>
+          <span className="text-5xl" role="img" aria-label="Film projector">📽️</span>
         </div>
         <p className="text-lg text-muted-foreground">
           💃 Let's find a great movie 🕺
