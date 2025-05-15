@@ -41,7 +41,7 @@ export default function MovieRatingsPageContent() {
       <header className="mb-10 text-center">
         <div className="flex items-center justify-center mb-2">
           <Film className="w-12 h-12 text-primary" />
-          <h1 className="text-5xl font-bold ml-3 text-primary">RateFind</h1>
+          <h1 className="text-5xl font-bold ml-3 text-primary">My Movie Finder</h1>
         </div>
         <p className="text-lg text-muted-foreground">
           Lets get great movie !
@@ -73,7 +73,7 @@ export default function MovieRatingsPageContent() {
         )}
       </main>
       <footer className="mt-auto pt-10 text-center text-sm text-muted-foreground">
-        <p>&copy; {new Date().getFullYear()} RateFind. All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()} My Movie Finder. All rights reserved.</p>
       </footer>
     </div>
   );
