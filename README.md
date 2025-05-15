@@ -258,4 +258,41 @@ sudo ufw enable # If not already enabled
 *   The Genkit AI flows are bundled as part of your Next.js application during the `npm run build` process. They are invoked as server-side functions (Next.js Server Actions).
 *   The `GOOGLE_API_KEY` (or any other API keys for Genkit plugins) **must** be set as an environment variable on your production server (e.g., in the `.env.production` file or configured directly in PM2's environment or system-wide).
 *   You do not need to run `genkit start` or `npm run genkit:dev` in production. Those commands are for local development and inspection of flows.
+
+## Docker Deployment
+
+This application can also be deployed as a Docker container. A `Dockerfile` using CentOS Stream 8 as a base image is provided.
+
+### Prerequisites
+
+*   Docker installed on your deployment machine/server.
+
+### Building the Docker Image
+
+1.  Ensure you have a `.dockerignore` file in your project root (one is provided) to exclude unnecessary files from the Docker build context.
+2.  From the root directory of the project (where the `Dockerfile` is located), run the build command:
+    ```bash
+    docker build -t my-movie-studio-app .
+    ```
+    You can replace `my-movie-studio-app` with your preferred image name and tag (e.g., `yourusername/my-movie-studio:latest`).
+
+### Running the Docker Container
+
+1.  Once the image is built, you can run it as a container:
+    ```bash
+    docker run -p 3000:3000 -e GOOGLE_API_KEY="YOUR_ACTUAL_GEMINI_API_KEY" --name movie-studio-container my-movie-studio-app
+    ```
+    *   `-p 3000:3000`: Maps port 3000 on your host machine to port 3000 inside the container (where Next.js is running).
+    *   `-e GOOGLE_API_KEY="YOUR_ACTUAL_GEMINI_API_KEY"`: Sets the `GOOGLE_API_KEY` environment variable inside the container. **Replace `"YOUR_ACTUAL_GEMINI_API_KEY"` with your actual API key.**
+    *   `--name movie-studio-container`: (Optional) Assigns a name to your running container for easier management.
+    *   `my-movie-studio-app`: The name of the Docker image you built.
+
+2.  The application should now be accessible at `http://localhost:3000` on your host machine (or the server's IP if running on a remote server).
+
+### Docker Notes
+
+*   **Secrets Management:** The `GOOGLE_API_KEY` is passed as an environment variable at runtime. For more robust secret management in production, consider using Docker secrets, HashiCorp Vault, or your cloud provider's secret management service.
+*   **Image Size:** Using CentOS as a base image results in a larger Docker image. For production environments where image size is critical, consider adapting the `Dockerfile` to use a more minimal Node.js base image like `node:20-alpine`. This would require changing the package installation commands from `yum` to `apk`.
+*   **Standalone Output:** For further optimization, you can configure Next.js for `output: 'standalone'` in `next.config.js`. This produces a minimal server that copies only necessary files. The Dockerfile would need to be adjusted to leverage this, typically resulting in much smaller final images.
+*   **Genkit in Docker:** The Genkit flows are part of the Next.js build. The `GOOGLE_API_KEY` environment variable is essential for them to function. No separate Genkit process needs to be run in the Docker container for production.
 ```
