@@ -44,7 +44,7 @@ export default function MovieRatingsPageContent() {
           <h1 className="text-5xl font-bold ml-3 text-primary">My Movie Finder</h1>
         </div>
         <p className="text-lg text-muted-foreground">
-          Lets get great movie !
+          🥳 Let's find a great movie 🥳
         </p>
       </header>
 
