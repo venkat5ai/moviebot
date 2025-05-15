@@ -1,73 +1,70 @@
-# ---- Builder Stage ----
-# Using CentOS 8 Stream as the base image for the builder stage.
-FROM Quay.io/centos/centos:stream8 AS builder
 
-# Install Node.js v20.x using NodeSource repository, and git
-RUN yum update -y && \
-    yum install -y curl && \
-    curl -fsSL https://rpm.nodesource.com/setup_20.x | bash - && \
-    yum install -y nodejs git && \
-    yum clean all && \
-    rm -rf /var/cache/yum
+# Stage 1: Builder
+# Use an official Node.js Alpine image as a parent image for the build stage
+FROM node:20-alpine AS builder
 
 # Set the working directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json (or yarn.lock)
-COPY package*.json ./
+# Install necessary build tools and dependencies for native modules if any
+# For Alpine, common tools are python3, make, g++
+# Add git for fetching dependencies if needed from git repos
+RUN apk add --no-cache python3 make g++ git
 
-# Install all dependencies (including devDependencies needed for the build)
-RUN npm install
+# Copy package.json and package-lock.json (or yarn.lock)
+COPY package.json ./
+COPY package-lock.json ./
+# If you are using yarn, uncomment the next line and comment out the npm ci line
+# COPY yarn.lock ./
+
+# Install app dependencies
+# Use --frozen-lockfile for reproducible builds
+RUN npm ci
+# If you are using yarn, uncomment the next line and comment out the npm ci line
+# RUN yarn install --frozen-lockfile
 
 # Copy the rest of the application code
 COPY . .
 
-# Set build-time environment variables if any (e.g., for public URLs, not secrets)
-# Example: ENV NEXT_PUBLIC_API_URL="/api"
+# Set environment variable for Next.js to output standalone build
+ENV NEXT_TELEMETRY_DISABLED 1
 
-# Build the Next.js application
+# Build the Next.js application for production
+# The standalone output will copy only necessary files into the .next/standalone folder
 RUN npm run build
 
-# ---- Runner Stage ----
-# Using CentOS 8 Stream as the base image for the runner stage.
-FROM Quay.io/centos/centos:stream8
 
-# Install Node.js v20.x for the runtime environment
-RUN yum update -y && \
-    yum install -y curl && \
-    curl -fsSL https://rpm.nodesource.com/setup_20.x | bash - && \
-    yum install -y nodejs && \
-    # Next.js apps might need libuuid for crypto, and fontconfig for canvas-based image processing if used
-    # For basic Next.js serving, Node.js itself is usually sufficient.
-    # yum install -y libuuid fontconfig && \
-    yum clean all && \
-    rm -rf /var/cache/yum
+# Stage 2: Runner
+# Use a minimal Node.js Alpine image for the runtime stage
+FROM node:20-alpine AS runner
 
 # Set the working directory
 WORKDIR /app
 
+# Create a non-root user for security best practices
+RUN addgroup -S nextjs && adduser -S nextjs -G nextjs
+
+# Copy the standalone Next.js build output from the builder stage
+COPY --from=builder /app/.next/standalone ./
+# Copy the public directory (if it exists and contains assets needed at runtime)
+COPY --from=builder /app/public ./public
+# Copy the .next/static directory for serving static assets efficiently
+COPY --from=builder /app/.next/static ./.next/static
+
 # Set environment variables
 ENV NODE_ENV=production
-# The GOOGLE_API_KEY should be passed at runtime when starting the container.
-# ENV GOOGLE_API_KEY="your_api_key_goes_here_if_not_passed_at_runtime" # Not recommended for secrets
-ENV PORT=3000
+ENV NEXT_TELEMETRY_DISABLED 1
+# The GOOGLE_API_KEY should be passed in at runtime via `docker run -e`
 
-# Copy necessary artifacts from the builder stage
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/next.config.ts ./next.config.ts
-# If you have a .env.production that is NOT for secrets but for build/runtime config, copy it.
-# COPY --from=builder /app/.env.production ./.env.production
+# Change ownership of the app files to the non-root user
+RUN chown -R nextjs:nextjs /app
 
-# Install production dependencies only
-# This ensures that the node_modules are built against the runner's environment,
-# which is good practice if there are any native modules.
-RUN npm install --production
+# Switch to the non-root user
+USER nextjs
 
-# Expose the port the app runs on
+# Expose the port the app runs on (Next.js default is 3000)
 EXPOSE 3000
 
-# Set the default command to start the Next.js application
-# This will use the "start" script from package.json (i.e., "next start")
-CMD ["npm", "start"]
+# Define the command to run the app
+# This uses the server.js file from the standalone output
+CMD ["node", "server.js"]

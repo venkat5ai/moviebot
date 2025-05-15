@@ -293,7 +293,7 @@ sudo ufw enable # If not already enabled
 
 ## Docker Deployment
 
-This application can also be deployed as a Docker container. A `Dockerfile` using CentOS Stream 8 as a base image is provided.
+This application can also be deployed as a Docker container. A `Dockerfile` using a Node.js Alpine base image (`node:20-alpine`) is provided for smaller image sizes.
 
 ### Prerequisites
 
@@ -324,12 +324,12 @@ This application can also be deployed as a Docker container. A `Dockerfile` usin
 ### Docker Notes
 
 *   **Secrets Management:** The `GOOGLE_API_KEY` is passed as an environment variable at runtime. For more robust secret management in production, consider using Docker secrets, HashiCorp Vault, or your cloud provider's secret management service.
-*   **Image Size:** Using CentOS as a base image results in a larger Docker image. For production environments where image size is critical, consider adapting the `Dockerfile` to use a more minimal Node.js base image like `node:20-alpine`. This would require changing the package installation commands from `yum` to `apk`.
-*   **Standalone Output:** For further optimization, you can configure Next.js for `output: 'standalone'` in `next.config.js`. This produces a minimal server that copies only necessary files. The Dockerfile would need to be adjusted to leverage this, typically resulting in much smaller final images.
+*   **Image Size:** Using `node:20-alpine` as the base image significantly reduces the Docker image size compared to larger OS distributions like CentOS. The Dockerfile also uses a multi-stage build and Next.js's standalone output feature to further optimize the final image.
+*   **Standalone Output:** The `Dockerfile` leverages Next.js's `output: 'standalone'` feature (implicitly enabled by default in recent Next.js versions when building for Node.js runtime, but explicitly managed in the Dockerfile by copying `./.next/standalone`). This copies only necessary files for production, resulting in much smaller final images.
 *   **Genkit in Docker:** The Genkit flows are part of the Next.js build. The `GOOGLE_API_KEY` environment variable is essential for them to function. No separate Genkit process needs to be run in the Docker container for production.
 *   **SSL/HTTPS with Docker:** As mentioned, the Next.js app inside the container runs on HTTP (port 3000). For HTTPS, you'd typically:
     *   Run a reverse proxy (like Nginx) on the host machine or as another Docker container.
     *   Configure the reverse proxy to listen on port 443, handle SSL with your certificates, and proxy requests to the port your Next.js container is exposed on (e.g., port 3000 on the host).
     *   Alternatively, use a Docker-aware reverse proxy like Traefik which can automate SSL certificate acquisition (e.g., from Let's Encrypt) and routing.
-```
+
     
