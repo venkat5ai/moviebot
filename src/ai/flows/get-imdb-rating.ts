@@ -28,37 +28,35 @@ export async function getImdbRating(input: GetImdbRatingInput): Promise<GetImdbR
 
 const getImdbRatingTool = ai.defineTool({
   name: 'getImdbRating',
-  description: 'Retrieves the IMDB rating for a given movie title.',
-  inputSchema: z.object({
-    movieTitle: z.string().describe('The title of the movie to search for.'),
-  }),
-  outputSchema: z.string(),
+  description: 'Retrieves the IMDB rating for a given movie title and provides it in a structured JSON format.',
+  inputSchema: GetImdbRatingInputSchema, // Use the existing input schema
+  outputSchema: GetImdbRatingOutputSchema, // Tool now outputs the final JSON object
 },
-async (input) => {
+async (input: GetImdbRatingInput): Promise<GetImdbRatingOutput> => {
+  let ratingValue: string;
   // In a real implementation, this would call an external API
   // to fetch the IMDB rating for the given movie title.
   // For this example, we'll just return a placeholder value.
   if (input.movieTitle.toLowerCase().includes('example')) {
-    return '7.5';
+    ratingValue = '7.5';
+  } else if (input.movieTitle.toLowerCase().includes('unavailable')) {
+    ratingValue = 'N/A';
+  } else {
+    // For any other movie title, return a placeholder rating.
+    // A real implementation would query an API here.
+    ratingValue = '8.0'; 
   }
-  if (input.movieTitle.toLowerCase().includes('unavailable')) {
-    return 'N/A';
-  }
-  return '8.0';
+  return { imdbRating: ratingValue }; // Tool returns the complete object
 });
 
 const prompt = ai.definePrompt({
   name: 'getImdbRatingPrompt',
   input: {schema: GetImdbRatingInputSchema},
-  output: {schema: GetImdbRatingOutputSchema},
+  output: {schema: GetImdbRatingOutputSchema}, // This aligns with the tool's output
   tools: [getImdbRatingTool],
-  prompt: `What is the IMDB rating for the movie "{{movieTitle}}"? Use the getImdbRating tool to find the rating. If the rating is not available, respond with N/A.
-
-Respond in the following format:
-\{
-  "imdbRating": "<rating>"
-\}
-`,
+  prompt: `You must use the 'getImdbRating' tool to find the IMDB rating for the movie "{{movieTitle}}".
+The tool will return the data in the required JSON object format.
+Your response should be ONLY the JSON object returned by the tool. Do not add any other text or explanation.`,
 });
 
 const getImdbRatingFlow = ai.defineFlow(
