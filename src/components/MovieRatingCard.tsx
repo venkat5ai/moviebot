@@ -3,7 +3,7 @@
 
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Star, Award, User } from "lucide-react"; 
+import { Star, Award, Users } from "lucide-react"; 
 import type { MovieRatings } from "@/app/actions";
 import { Separator } from "@/components/ui/separator";
 
@@ -48,26 +48,19 @@ export default function MovieRatingCard({ title, imdbRating, rottenTomatoesRatin
         {showCast && (
           <div>
             <Separator className="my-4" />
-            <h3 className="text-xl font-semibold text-primary mb-3">Lead Cast</h3>
-            <div className="space-y-3">
-              {leadActor && leadActor !== "N/A" && (
-                <div className="flex items-center p-3 bg-secondary/50 rounded-lg">
-                  <User className="h-6 w-6 text-primary mr-3" />
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">Lead Actor</p>
-                    <p className="text-md font-semibold text-secondary-foreground">{leadActor}</p>
-                  </div>
-                </div>
-              )}
-              {leadActress && leadActress !== "N/A" && (
-                <div className="flex items-center p-3 bg-secondary/50 rounded-lg">
-                  <User className="h-6 w-6 text-pink-500 mr-3" /> 
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">Lead Actress</p>
-                    <p className="text-md font-semibold text-secondary-foreground">{leadActress}</p>
-                  </div>
-                </div>
-              )}
+            <h3 className="text-xl font-semibold text-primary mb-3 flex items-center">
+              <Users className="h-6 w-6 mr-2 text-primary" />
+              Lead Cast
+            </h3>
+            <div className="p-3 bg-secondary/50 rounded-lg">
+              <div className="space-y-1">
+                {leadActor && leadActor !== "N/A" && (
+                  <p className="text-md font-semibold text-secondary-foreground">{leadActor}</p>
+                )}
+                {leadActress && leadActress !== "N/A" && (
+                  <p className="text-md font-semibold text-secondary-foreground">{leadActress}</p>
+                )}
+              </div>
             </div>
           </div>
         )}
@@ -80,3 +73,4 @@ export default function MovieRatingCard({ title, imdbRating, rottenTomatoesRatin
     </Card>
   );
 }
+
