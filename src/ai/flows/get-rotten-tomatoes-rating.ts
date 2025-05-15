@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview Retrieves the Rotten Tomatoes rating for a given movie title.
@@ -68,19 +69,9 @@ const getRottenTomatoesRatingFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await getRottenTomatoesRatingPrompt(input);
-    // If the output is null or undefined, it means the LLM might have failed to call the tool or format the response.
-    // We ensure a valid, though potentially "N/A", output.
-    if (!output || typeof output.rottenTomatoesRating === 'undefined') {
-        // Attempt to call the tool directly as a fallback,
-        // though the LLM should ideally handle this through the prompt.
-        try {
-            const toolResult = await getRottenTomatoesRatingTool(input);
-            return toolResult;
-        } catch (e) {
-            console.error("Error directly calling getRottenTomatoesRatingTool:", e);
-            return { rottenTomatoesRating: 'N/A' };
-        }
-    }
-    return output;
+    // Rely on the prompt and tool to return the correctly structured output,
+    // matching the behavior of the working IMDB flow.
+    return output!;
   }
 );
+
