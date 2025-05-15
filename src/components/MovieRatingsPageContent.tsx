@@ -40,7 +40,7 @@ export default function MovieRatingsPageContent() {
       <header className="mb-10 text-center">
         <div className="flex items-center justify-center mb-2">
           <span className="text-5xl" role="img" aria-label="Clapper board">🎬</span>
-          <h1 className="text-5xl font-bold mx-3 text-primary">MovieFinder</h1>
+          <h1 className="text-5xl font-bold mx-3 text-primary">My Movie Finder</h1>
           <span className="text-5xl" role="img" aria-label="Film projector">📽️</span>
         </div>
         <p className="text-lg text-muted-foreground">
@@ -73,7 +73,7 @@ export default function MovieRatingsPageContent() {
         )}
       </main>
       <footer className="mt-auto pt-10 text-center text-sm text-muted-foreground">
-        <p>&copy; {new Date().getFullYear()} MovieFinder. All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()} My Movie Finder. All rights reserved.</p>
       </footer>
     </div>
   );
