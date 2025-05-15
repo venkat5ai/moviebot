@@ -19,7 +19,7 @@ export type GetRottenTomatoesRatingInput = z.infer<typeof GetRottenTomatoesRatin
 const GetRottenTomatoesRatingOutputSchema = z.object({
   rottenTomatoesRating: z
     .string()
-    .describe('The Rotten Tomatoes rating for the movie (e.g., "90%"), or N/A if not available.'),
+    .describe('The Rotten Tomatoes rating for the movie. This value comes directly from the rating tool.'),
 });
 export type GetRottenTomatoesRatingOutput = z.infer<typeof GetRottenTomatoesRatingOutputSchema>;
 
@@ -56,9 +56,10 @@ const getRottenTomatoesRatingPrompt = ai.definePrompt({
   input: {schema: GetRottenTomatoesRatingInputSchema},
   output: {schema: GetRottenTomatoesRatingOutputSchema},
   tools: [getRottenTomatoesRatingTool],
-  prompt: `You must use the 'getRottenTomatoesRating' tool to find the Rotten Tomatoes rating for the movie "{{movieTitle}}".
-The tool will return the data in the required JSON object format.
-Your response should be ONLY the JSON object returned by the tool. Do not add any other text or explanation.`,
+  prompt: `Your task is to get the Rotten Tomatoes rating for the movie "{{movieTitle}}" using the 'getRottenTomatoesRating' tool.
+The 'getRottenTomatoesRating' tool will provide a JSON object.
+You MUST return this JSON object EXACTLY as the tool provides it. Do not modify it or add any surrounding text or explanations.
+The output format is strictly defined by the tool's output schema.`,
 });
 
 const getRottenTomatoesRatingFlow = ai.defineFlow(
@@ -69,8 +70,6 @@ const getRottenTomatoesRatingFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await getRottenTomatoesRatingPrompt(input);
-    // Rely on the prompt and tool to return the correctly structured output,
-    // matching the behavior of the working IMDB flow.
     return output!;
   }
 );
