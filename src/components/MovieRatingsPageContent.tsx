@@ -44,7 +44,7 @@ export default function MovieRatingsPageContent() {
           <h1 className="text-5xl font-bold ml-3 text-primary">RateFind</h1>
         </div>
         <p className="text-lg text-muted-foreground">
-          Get IMDb and Rotten Tomatoes ratings for any movie.
+          Lets get great movie !
         </p>
       </header>
 
