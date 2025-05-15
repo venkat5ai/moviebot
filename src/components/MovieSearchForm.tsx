@@ -136,13 +136,15 @@ export default function MovieSearchForm({ onSearch, isLoading }: MovieSearchForm
           )}
         </PopoverContent>
       </Popover>
-      <Button type="submit" disabled={isLoading || !movieTitle.trim()} className="bg-accent hover:bg-accent/90 text-accent-foreground mt-[1px]"> {/* Align button better with PopoverAnchor */}
+      <Button type="submit" disabled={isLoading || !movieTitle.trim()} className="bg-accent hover:bg-accent/90 text-accent-foreground mt-[1px]">
         {isLoading ? (
           <Loader2 className="h-5 w-5 animate-spin" />
         ) : (
-          <Search className="h-5 w-5 md:mr-2" />
+          // Removed Search icon from here
+          null 
         )}
-        <span className="hidden md:inline">Search</span>
+        <span className="hidden md:inline">Find</span> {/* Changed text to Find */}
+        <span className="md:hidden">Find</span> {/* Also show Find on smaller screens */}
       </Button>
     </form>
   );
