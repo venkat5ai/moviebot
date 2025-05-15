@@ -3,6 +3,8 @@
 
 import { getImdbRating, type GetImdbRatingInput, type GetImdbRatingOutput } from "@/ai/flows/get-imdb-rating";
 import { getRottenTomatoesRating, type GetRottenTomatoesRatingInput, type GetRottenTomatoesRatingOutput } from "@/ai/flows/get-rotten-tomatoes-rating";
+import { getMovieSuggestions, type GetMovieSuggestionsInput, type GetMovieSuggestionsOutput } from "@/ai/flows/get-movie-suggestions";
+
 
 export interface MovieRatings {
   title: string;
@@ -45,5 +47,25 @@ export async function fetchMovieRatingsAction(movieTitle: string): Promise<Fetch
     // Check if e is an instance of Error to safely access e.message
     const errorMessage = e instanceof Error ? e.message : "An unknown error occurred while fetching ratings.";
     return { error: `Failed to fetch ratings: ${errorMessage}` };
+  }
+}
+
+export interface FetchMovieSuggestionsResult {
+  suggestions?: string[];
+  error?: string;
+}
+
+export async function fetchMovieSuggestionsAction(query: string): Promise<FetchMovieSuggestionsResult> {
+  if (!query || query.trim().length < 2) { // Minimum query length for suggestions
+    return { suggestions: [] };
+  }
+  try {
+    const input: GetMovieSuggestionsInput = { query };
+    const response = await getMovieSuggestions(input);
+    return { suggestions: (response as GetMovieSuggestionsOutput)?.suggestions || [] };
+  } catch (e) {
+    console.error("Error fetching movie suggestions:", e);
+    const errorMessage = e instanceof Error ? e.message : "An unknown error occurred while fetching suggestions.";
+    return { error: `Failed to fetch suggestions: ${errorMessage}` };
   }
 }
