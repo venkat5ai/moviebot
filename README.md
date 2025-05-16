@@ -5,12 +5,41 @@ To get started, take a look at src/app/page.tsx.
 
 ## What the App Does
 
-My Movie Studio is a web application that allows you to search for movies and retrieve detailed information about them. The app leverages external APIs to fetch movie data, including ratings from popular sources like IMDB and Rotten Tomatoes.
+My Movie Studio is a web application that allows you to search for movies and retrieve detailed information about them. The app leverages external APIs to fetch movie data, including ratings from popular sources like IMDB and Rotten Tomatoes, as well as lead cast information.
 
 Key Features:
 
 - **Movie Search:** Easily search for movies using a search bar.
-- **Detailed Information Display:** View movie details, including title, release date, and ratings from IMDB and Rotten Tomatoes. This information is presented in a clean, card-based layout for easy readability, as outlined in the `docs/blueprint.md` file.
+- **Automatic Suggestions:** As you type a movie title (at least 2 characters), relevant movie suggestions appear in a dropdown to help you find what you're looking for quickly.
+- **Detailed Information Display:** View movie details, including title, release date, ratings from IMDB and Rotten Tomatoes, and lead cast members. This information is presented in a clean, card-based layout for easy readability.
+
+## Usage
+
+The application provides a simple and intuitive interface for finding movie information:
+
+1.  **Main Page Layout:**
+    *   **Header:** At the top of the page, you'll see the application title "My Movie Finder" 🎬 accompanied by fun emojis and a subtitle "💃 Let's find a great movie 🕺".
+    *   **Search Bar:** Prominently displayed below the header, this is where you'll enter the movie title you're interested in.
+    *   **Results Area:** Once you search for a movie, the details (ratings and cast) will appear in a card format in this section.
+    *   **Footer:** At the bottom of the page, a simple copyright notice is displayed.
+
+2.  **Searching for a Movie:**
+    *   Type the title of the movie you want to find into the search bar (e.g., "Inception", "Iron Man").
+    *   As you type (minimum 2 characters), a dropdown list of movie suggestions will appear below the search bar. You can click on any suggestion to populate the search bar with that title.
+    *   Once you've typed your desired movie title or selected a suggestion, click the "Find" button.
+
+3.  **Viewing Movie Details:**
+    *   After clicking "Find", if the movie details are found, a "Movie Rating Card" will appear.
+    *   This card displays:
+        *   The **Movie Title** at the top.
+        *   The **IMDb Rating** with a star icon.
+        *   The **Rotten Tomatoes Rating** with an award icon.
+        *   A **Lead Cast** section showing the lead actor and actress, if available.
+    *   If a rating or cast member is not available from the backend, it will typically show "N/A".
+
+4.  **Loading and Error States:**
+    *   While the application is fetching movie details after you click "Find", a loading indicator (skeleton UI) will be shown.
+    *   If an error occurs during the search (e.g., movie not found, network issue), an error message will be displayed in an alert box.
 
 ## Local Development
 
@@ -118,8 +147,8 @@ These instructions provide a general guide for deploying your Next.js applicatio
 
 1.  **Clone your repository on the server:**
     ```bash
-    git clone https://github.com/venkat5ai/studio.git
-    cd studio
+    git clone https://github.com/venkat5ai/studio.git # Or your actual repo URL
+    cd your-repo-name # e.g., cd studio
     ```
 
 2.  **Install Dependencies:**
