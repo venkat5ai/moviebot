@@ -1,0 +1,34 @@
+# Git files
+.git
+.gitignore
+
+# Node modules
+node_modules
+
+# Next.js build output (handled by Dockerfile multi-stage build)
+.next
+
+# IDE and OS specific files
+.vscode
+.idea
+.DS_Store
+*.swp
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment files (secrets should be passed at runtime)
+.env
+.env*.local
+.env.development
+.env.production
+# If .env.production is used for non-secret build vars copied in Dockerfile, then don't ignore it.
+# For this setup, we assume secrets are runtime-injected.
+
+# Test files and coverage reports (if any)
+coverage
+jest.config.js
+playwright.config.ts
+# Add other test-related files/folders if they are not needed in the image
