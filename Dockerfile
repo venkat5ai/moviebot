@@ -1,70 +1,68 @@
-
-# Stage 1: Builder
-# Use an official Node.js Alpine image as a parent image for the build stage
+# Stage 1: Build the Next.js application
 FROM node:20-alpine AS builder
 
-# Set the working directory
+# Set working directory
 WORKDIR /app
 
-# Install necessary build tools and dependencies for native modules if any
-# For Alpine, common tools are python3, make, g++
-# Add git for fetching dependencies if needed from git repos
-RUN apk add --no-cache python3 make g++ git
-
+# Install dependencies
 # Copy package.json and package-lock.json (or yarn.lock)
-COPY package.json ./
-COPY package-lock.json ./
-# If you are using yarn, uncomment the next line and comment out the npm ci line
+COPY package*.json ./
+# If you're using yarn, you might have yarn.lock instead
 # COPY yarn.lock ./
 
-# Install app dependencies
-# Use --frozen-lockfile for reproducible builds
-RUN npm ci
-# If you are using yarn, uncomment the next line and comment out the npm ci line
-# RUN yarn install --frozen-lockfile
+# Install dependencies based on the lock file
+# Using --frozen-lockfile or --ci is recommended for reproducible builds
+RUN npm ci --include=dev # Include devDependencies if build scripts need them
 
 # Copy the rest of the application code
 COPY . .
 
-# Set environment variable for Next.js to output standalone build
-ENV NEXT_TELEMETRY_DISABLED 1
+# Set environment variables for the build stage if necessary
+# For example, if your build process requires specific ENV VARS
+# ENV NEXT_PUBLIC_SOME_VAR="some_value"
 
-# Build the Next.js application for production
-# The standalone output will copy only necessary files into the .next/standalone folder
+# Build the Next.js application
+# The `next build` command will use the .env.production if it exists,
+# or you can pass build-time env vars directly.
+# Ensure GOOGLE_API_KEY is available if build step needs it (unlikely for client-side)
 RUN npm run build
 
+# Prune development dependencies if they were installed with `npm ci`
+# If you used `npm install --production` earlier, this might not be needed.
+# RUN npm prune --production
 
-# Stage 2: Runner
-# Use a minimal Node.js Alpine image for the runtime stage
+
+# Stage 2: Production image - Copy only necessary files from the builder stage
 FROM node:20-alpine AS runner
 
-# Set the working directory
 WORKDIR /app
 
-# Create a non-root user for security best practices
-RUN addgroup -S nextjs && adduser -S nextjs -G nextjs
+# Set environment to production
+ENV NODE_ENV production
+# ENV NEXT_TELEMETRY_DISABLED 1 # Recommended for production, already in your Dockerfile
+ENV PORT 3000
 
-# Copy the standalone Next.js build output from the builder stage
+# Create a non-root user for security (optional but recommended)
+# RUN addgroup -S nodejs && adduser -S nextjs -G nodejs
+# USER nextjs
+# Note: If you use a non-root user, ensure file permissions are correct for /app
+
+# Copy the standalone Next.js output from the builder stage.
+# This output is created by `next build` when `output: 'standalone'` is implicitly or explicitly active.
+# It should include your .next/static, public folder contents (if any), and server.js.
 COPY --from=builder /app/.next/standalone ./
-# Copy the public directory (if it exists and contains assets needed at runtime)
-COPY --from=builder /app/public ./public
-# Copy the .next/static directory for serving static assets efficiently
-COPY --from=builder /app/.next/static ./.next/static
 
-# Set environment variables
-ENV NODE_ENV=production
-ENV NEXT_TELEMETRY_DISABLED 1
-# The GOOGLE_API_KEY should be passed in at runtime via `docker run -e`
+# The public and .next/static directories should be part of the standalone output.
+# Therefore, the explicit COPY commands below are usually redundant and can be removed
+# if 'standalone' output is correctly configured and working.
+# The error encountered was due to /app/public not existing in the builder stage.
+# COPY --from=builder /app/public ./public
+# COPY --from=builder /app/.next/static ./.next/static
 
-# Change ownership of the app files to the non-root user
-RUN chown -R nextjs:nextjs /app
 
-# Switch to the non-root user
-USER nextjs
-
-# Expose the port the app runs on (Next.js default is 3000)
+# Expose the port the app runs on
 EXPOSE 3000
 
-# Define the command to run the app
-# This uses the server.js file from the standalone output
+# Command to run the application
+# This will start the Next.js server using the server.js file from the standalone output.
 CMD ["node", "server.js"]
