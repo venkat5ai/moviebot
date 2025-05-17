@@ -1,4 +1,3 @@
-
 # My Movie Studio 
 
 To get started, take a look at src/app/page.tsx.
@@ -381,6 +380,3 @@ This application can also be deployed as a Docker container. A `Dockerfile` usin
     *   Run a reverse proxy (like Nginx) on the host machine or as another Docker container.
     *   Configure the reverse proxy to listen on port 443, handle SSL with your certificates, and proxy requests to the port your Next.js container is exposed on (e.g., port 3000 on the host).
     *   Alternatively, use a Docker-aware reverse proxy like Traefik which can automate SSL certificate acquisition (e.g., from Let's Encrypt) and routing.
-
-    
-
