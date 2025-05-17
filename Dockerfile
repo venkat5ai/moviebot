@@ -1,70 +1,59 @@
 
-# Stage 1: Builder
-# Use an official Node.js Alpine image as a parent image for the build stage
+# --- Builder Stage ---
+# Use official Node.js Alpine image as a base image
 FROM node:20-alpine AS builder
-
-# Set the working directory
 WORKDIR /app
 
-# Install necessary build tools and dependencies for native modules if any
-# For Alpine, common tools are python3, make, g++
-# Add git for fetching dependencies if needed from git repos
-RUN apk add --no-cache python3 make g++ git
-
 # Copy package.json and package-lock.json (or yarn.lock)
-COPY package.json ./
-COPY package-lock.json ./
-# If you are using yarn, uncomment the next line and comment out the npm ci line
-# COPY yarn.lock ./
+COPY package*.json ./
 
-# Install app dependencies
-# Use --frozen-lockfile for reproducible builds
-RUN npm ci
-# If you are using yarn, uncomment the next line and comment out the npm ci line
-# RUN yarn install --frozen-lockfile
+# Install dependencies
+# Using --legacy-peer-deps as it was in your setup, adjust if not needed
+RUN npm install --legacy-peer-deps
 
 # Copy the rest of the application code
 COPY . .
 
-# Set environment variable for Next.js to output standalone build
+# Build the Next.js application
+# Ensure NEXT_TELEMETRY_DISABLED is set if you want to disable telemetry during build
 ENV NEXT_TELEMETRY_DISABLED 1
-
-# Build the Next.js application for production
-# The standalone output will copy only necessary files into the .next/standalone folder
 RUN npm run build
 
-
-# Stage 2: Runner
-# Use a minimal Node.js Alpine image for the runtime stage
+# --- Runner Stage ---
+# Use a clean Alpine image for the runner
 FROM node:20-alpine AS runner
-
-# Set the working directory
 WORKDIR /app
 
-# Create a non-root user for security best practices
-RUN addgroup -S nextjs && adduser -S nextjs -G nextjs
+# Set the NODE_ENV to production
+ENV NODE_ENV production
 
-# Copy the standalone Next.js build output from the builder stage
-COPY --from=builder /app/.next/standalone ./
-# Copy the public directory (if it exists and contains assets needed at runtime)
-COPY --from=builder /app/public ./public
-# Copy the .next/static directory for serving static assets efficiently
-COPY --from=builder /app/.next/static ./.next/static
+# Create a non-root user and group for security
+# GID and UID 1001 are common choices
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
 
-# Set environment variables
-ENV NODE_ENV=production
-ENV NEXT_TELEMETRY_DISABLED 1
-# The GOOGLE_API_KEY should be passed in at runtime via `docker run -e`
+# Copy the standalone output from the builder stage.
+# This should include server.js, .next/server, and potentially .next/static and public assets
+# depending on the Next.js version's standalone implementation.
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 
-# Change ownership of the app files to the non-root user
-RUN chown -R nextjs:nextjs /app
+# Explicitly copy the .next/static directory from the builder stage.
+# The server.js in standalone output expects to serve static assets from ./.next/static
+# This ensures they are definitely in the right place with correct ownership.
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-# Switch to the non-root user
+# Note: The 'public' directory's assets (if any) should be bundled into 
+# /app/.next/standalone/public by the `next build` with `output: 'standalone'`.
+# If you had a public directory and assets were still missing, you might need:
+# COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+# But ensure /app/public exists in the builder stage to avoid errors.
+# For now, we rely on standalone output to handle this.
+
+# Set the user to the non-root user
 USER nextjs
 
-# Expose the port the app runs on (Next.js default is 3000)
 EXPOSE 3000
+# ENV PORT 3000 # PORT is often set by the hosting environment, but can be defaulted here.
 
-# Define the command to run the app
-# This uses the server.js file from the standalone output
+# The CMD will run "node server.js" which is part of the standalone output.
 CMD ["node", "server.js"]
